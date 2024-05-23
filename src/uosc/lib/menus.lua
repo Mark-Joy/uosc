@@ -452,7 +452,7 @@ do
 							if title_part:sub(1, 3) == '---' then
 								local last_item = target_menu.items[#target_menu.items]
 								if last_item then last_item.separator = true end
-							elseif command ~= 'ignore' then
+							else
 								local item = {
 									title = title_part,
 									hint = not is_dummy and key or nil,
@@ -484,7 +484,7 @@ function get_keybinds_items()
 	-- uosc and mpv-menu-plugin binds with no keys
 	local no_key_menu_binds = itable_filter(
 		get_all_user_bindings(),
-		function(b) return b.is_menu_item and b.cmd and b.cmd ~= '' and (b.key == '#' or b.key == '_') end
+		function(b) return b.is_menu_item and b.cmd and b.cmd ~= '' and b.cmd ~= 'ignore' and (b.key == '#' or b.key == '_') end
 	)
 	local binds_dump = itable_join(find_active_keybindings(), no_key_menu_binds)
 	local ids = {}
@@ -492,7 +492,7 @@ function get_keybinds_items()
 	-- Convert to menu items
 	for _, bind in pairs(binds_dump) do
 		local id = bind.key .. '<>' .. bind.cmd
-		if not ids[id] and bind.cmd ~= 'ignore' then
+		if not ids[id] then
 			ids[id] = true
 			items[#items + 1] = {title = bind.cmd, hint = bind.key, value = bind.cmd}
 		end
