@@ -341,6 +341,17 @@ function open_drives_menu(handle_select, opts)
 	)
 end
 
+function add_menu_item(line)
+	if not line then return end
+	-- get_menu_items must be called before add_user_binding and add_menu_line
+	get_menu_items()
+	local bind = add_user_binding(line)
+	if not bind then return end
+	local key, cmd = bind.key, bind.cmd
+	add_menu_line(bind)
+	if key and cmd then mp.add_forced_key_binding(key, function() mp.command(cmd) end) end
+end
+
 -- On demand menu items loading
 do
 	---@type {key: string; cmd: string; comment: string; is_menu_item: boolean}[]|nil
@@ -380,7 +391,7 @@ do
 			input_conf_iterator = io.lines(input_conf_path)
 		end
 
-		for line in input_conf_iterator do
+		function add_user_binding(line)
 			local key, command, comment = string.match(line, '%s*([%S]+)%s+([^#]*)%s*(.-)%s*$')
 			local is_commented_out = key and key:sub(1, 1) == '#'
 
@@ -400,7 +411,12 @@ do
 					comment = comment or '',
 					is_menu_item = is_menu_item,
 				}
+				return all_user_bindings[#all_user_bindings]
 			end
+		end
+
+		for line in input_conf_iterator do
+			add_user_binding(line)
 		end
 
 		return all_user_bindings
@@ -413,7 +429,7 @@ do
 		local main_menu = {items = {}, items_by_command = {}}
 		local by_id = {}
 
-		for _, bind in ipairs(all_user_bindings) do
+		function add_menu_line(bind)
 			local key, command, comment = bind.key, bind.cmd, bind.comment
 			local title = ''
 
@@ -471,6 +487,10 @@ do
 					end
 				end
 			end
+		end
+
+		for _, bind in ipairs(all_user_bindings) do
+			add_menu_line(bind)
 		end
 
 		menu_items = #main_menu.items > 0 and main_menu.items or create_default_menu_items()
