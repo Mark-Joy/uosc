@@ -581,6 +581,8 @@ function select_current_chapter()
 	set_state('current_chapter', current_chapter)
 end
 
+mp.add_periodic_timer(60, render_wipe)
+
 --[[ STATE HOOKS ]]
 
 -- Click detection
@@ -1042,6 +1044,7 @@ end)
 bind_command('update', function()
 	if not Elements:has('updater') then require('elements/Updater'):new() end
 end)
+bind_command('render-wipe', render_wipe)
 
 --[[ MESSAGE HANDLERS ]]
 

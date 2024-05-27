@@ -896,6 +896,12 @@ function render()
 	update_margins()
 end
 
+function render_wipe()
+	msg.trace('render_wipe()')
+	osd.data = '' -- allows set_osd to immediately update on enable
+	osd:remove()
+end
+
 -- Request that render() is called.
 -- The render is then either executed immediately, or rate-limited if it was
 -- called a small time ago.
