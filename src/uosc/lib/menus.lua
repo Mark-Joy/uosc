@@ -459,14 +459,17 @@ do
 
 						target_menu = by_id[submenu_id]
 					else
-						if command == 'ignore' then break end
 						-- If command is already in menu, just append the key to it
-						if key ~= '#' and command ~= '' and target_menu.items_by_command[command] then
+						if key ~= '#' and command ~= '' and command ~= 'ignore' and target_menu.items_by_command[command] then
 							local hint = target_menu.items_by_command[command].hint
-							target_menu.items_by_command[command].hint = hint and hint .. ', ' .. key or key
+							if not hint then
+								target_menu.items_by_command[command].hint = key
+							elseif not string.find(', ' .. hint .. ', ', ', ' .. key .. ', ') then
+								target_menu.items_by_command[command].hint = hint .. ', ' .. key
+							end
 						else
 							-- Separator
-							if title_part:sub(1, 3) == '---' then
+							if title_part:sub(1, -1) == '---' or title_part:sub(1, -1) == '-' then
 								local last_item = target_menu.items[#target_menu.items]
 								if last_item then last_item.separator = true end
 							else
