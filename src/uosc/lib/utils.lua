@@ -800,11 +800,13 @@ end
 
 ---@param type 'sub'|'audio'|'video'
 ---@param path string
-function load_track(type, path)
-	mp.commandv(type .. '-add', path, 'cached')
-	-- If subtitle track was loaded, assume the user also wants to see it
+function load_track(type, path, lang)
 	if type == 'sub' then
+		mp.commandv('sub-add', path, 'cached', '', lang)
+		-- If subtitle track was loaded, assume the user also wants to see it
 		mp.commandv('set', 'sub-visibility', 'yes')
+	else
+		mp.commandv(type .. '-add', path, 'cached')
 	end
 end
 

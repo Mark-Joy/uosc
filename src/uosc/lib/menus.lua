@@ -743,6 +743,7 @@ function open_subtitle_downloader()
 			handle_search(data.query, data.page)
 			return
 		end
+		local lang = data.lang
 
 		menu = Menu:open({
 			type = menu_type .. '-result',
@@ -769,8 +770,21 @@ function open_subtitle_downloader()
 			end)
 
 			if not data then return end
-
-			load_track('sub', data.file)
+			
+			--local dir,fn = utils.split_path(data.file)
+			--local ext = fn:match("%.[^.]+$")
+			--https://stackoverflow.com/questions/29436088/how-to-use-regex-to-get-file-extension
+			--https://stackoverflow.com/questions/5243179/what-is-the-neatest-way-to-split-out-a-path-name-into-its-components-in-lua
+			local dir, fn, ext = data.file:match("(.-)([^\\]-)(%.[^.]+)$")      -- dir, name, .ext
+			fn = mp.get_property('filename/no-ext')
+			fn = utils.join_path(dir, fn)..'-'..lang..ext
+			if data.file ~= fn then
+        if utils.file_info(fn) then os.remove(fn) msg.trace('Old subtitle deleted:', fn) end
+				os.rename(data.file, fn)
+				data.file = fn
+			end
+			
+			load_track('sub', data.file, lang)
 
 			menu:update_items({
 				{
@@ -850,7 +864,7 @@ function open_subtitle_downloader()
 				return {
 					title = sub.attributes.release,
 					hint = table.concat(hints, ', '),
-					value = {kind = 'file', id = sub.attributes.files[1].file_id},
+					value = {kind = 'file', id = sub.attributes.files[1].file_id, lang = sub.attributes.language},
 					keep_open = true,
 				}
 			end)
